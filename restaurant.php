@@ -55,16 +55,30 @@ if (!empty($user_dietary) && !$show_all) {
 $stmt->execute();
 $dishes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch reviews
+// Fetch reviews with pagination
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$per_page = 5;
+$offset = ($page - 1) * $per_page;
+
 $stmt = $pdo->prepare("
     SELECT re.rating, re.comment, re.created_at, u.name AS user_name
     FROM reviews re
     JOIN users u ON re.user_id = u.id
     WHERE re.restaurant_id = :id
     ORDER BY re.created_at DESC
+    LIMIT :limit OFFSET :offset
 ");
-$stmt->execute([':id' => $restaurant_id]);
+$stmt->bindValue(':id', $restaurant_id, PDO::PARAM_INT);
+$stmt->bindValue(':limit', $per_page, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Total reviews for pagination
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM reviews WHERE restaurant_id = :id");
+$stmt->execute([':id' => $restaurant_id]);
+$total_reviews = $stmt->fetchColumn();
+$total_pages = ceil($total_reviews / $per_page);
 
 // Function to display stars
 function displayStars($rating) {
@@ -95,7 +109,7 @@ function displayStars($rating) {
                 <button class="dropdown-btn">Menu ▼</button>
                 <div class="dropdown-content">
                     <a href="dashboard.php">Home</a>
-                    <a href="preference.php">Preference</a>
+                    <a href="#about">About</a>
                     <a href="#contact">Contact</a>
                     <a href="logout.php">Logout</a>
                 </div>
@@ -116,7 +130,7 @@ function displayStars($rating) {
             <h3>Menu</h3>
             <?php if (!empty($user_dietary)): ?>
                 <p>
-                    <a href="?id=<?php echo $restaurant_id; ?>&show_all=<?php echo $show_all ? '0' : '1'; ?>">
+                    <a href="?id=<?php echo $restaurant_id; ?>&show_all=<?php echo $show_all ? '0' : '1'; ?>&page=<?php echo $page; ?>">
                         <?php echo $show_all ? 'Filter by My Preferences' : 'Show All Dishes'; ?>
                     </a>
                 </p>
@@ -144,6 +158,11 @@ function displayStars($rating) {
                         <p class="date"><?php echo date('F j, Y', strtotime($review['created_at'])); ?></p>
                     </div>
                 <?php endforeach; ?>
+                <div class="pagination">
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                        <a href="?id=<?php echo $restaurant_id; ?>&page=<?php echo $i; ?>&show_all=<?php echo $show_all ? '1' : '0'; ?>" <?php echo $i == $page ? 'class="active"' : ''; ?>><?php echo $i; ?></a>
+                    <?php endfor; ?>
+                </div>
             <?php endif; ?>
         </section>
     </main>
