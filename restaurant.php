@@ -98,19 +98,19 @@ function displayStars($rating) {
     <link rel="stylesheet" href="restaurant.css">
 </head>
 <body>
+    <!-- Header -->
     <header>
         <div class="header-left">
             <h1>Foodie</h1>
-            <img src="foodie-logo.png" alt="Foodie Logo" class="logo">
+            <img src="istockphoto-1295311342-612x612.jpg" alt="Foodie Logo" class="logo">
         </div>
         <div class="header-right">
-            <img src="profile-icon.png" alt="Profile" class="profile-icon">
+            <a href="preference.php"><img src="user-member-avatar-face-profile-icon-vector-22965342.jpg" alt="Profile" class="profile-icon"></a>
             <div class="dropdown">
                 <button class="dropdown-btn">Menu ▼</button>
                 <div class="dropdown-content">
                     <a href="dashboard.php">Home</a>
-                    <a href="#about">About</a>
-                    <a href="#contact">Contact</a>
+                    <a href="preference.php">Prefernce</a>
                     <a href="logout.php">Logout</a>
                 </div>
             </div>
