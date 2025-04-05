@@ -12,14 +12,21 @@ try {
     die("Connection failed: " . $e->getMessage());
 }
 
-// Fetch restaurants
-$sql = "SELECT r.*, c.name AS cuisine_name FROM restaurants r JOIN cuisines c ON r.cuisine_id = c.id";
+// Fetch restaurants with dynamic average rating
+$sql = "
+    SELECT r.*, c.name AS cuisine_name, AVG(re.rating) AS avg_rating
+    FROM restaurants r
+    JOIN cuisines c ON r.cuisine_id = c.id
+    LEFT JOIN reviews re ON r.id = re.restaurant_id
+    GROUP BY r.id, r.name, r.location, r.cuisine_id, r.photo
+";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Function to display stars
 function displayStars($rating) {
+    $rating = $rating ?: 0; // Default to 0 if null (no reviews)
     $fullStars = floor($rating);
     $halfStar = ($rating - $fullStars) >= 0.5 ? 1 : 0;
     $emptyStars = 5 - $fullStars - $halfStar;
@@ -42,13 +49,12 @@ function displayStars($rating) {
             <img src="istockphoto-1295311342-612x612.jpg" alt="Foodie Logo" class="logo">
         </div>
         <div class="header-right">
-            <a href=""><img src="user-member-avatar-face-profile-icon-vector-22965342.jpg" alt="Profile" class="profile-icon"></a>
+            <a href="preference.php"><img src="user-member-avatar-face-profile-icon-vector-22965342.jpg" alt="Profile" class="profile-icon"></a>
             <div class="dropdown">
                 <button class="dropdown-btn">Menu ▼</button>
                 <div class="dropdown-content">
                     <a href="dashboard.php">Home</a>
-                    <a href="#about">About</a>
-                    <a href="#contact">Contact</a>
+                    <a href="preference.php">Prefernce</a>
                     <a href="logout.php">Logout</a>
                 </div>
             </div>
@@ -61,11 +67,11 @@ function displayStars($rating) {
         <div class="restaurant-grid">
             <?php foreach ($restaurants as $restaurant): ?>
                 <a href="restaurant.php?id=<?php echo $restaurant['id']; ?>" class="restaurant-card">
-                    <img src="restaurant-photo.jpg" alt="<?php echo htmlspecialchars($restaurant['name']); ?>" class="restaurant-photo">
+                    <img src="<?php echo htmlspecialchars($restaurant['photo']); ?>" alt="<?php echo htmlspecialchars($restaurant['name']); ?>" class="restaurant-photo">
                     <h3><?php echo htmlspecialchars($restaurant['name']); ?></h3>
                     <p>Cuisine: <?php echo htmlspecialchars($restaurant['cuisine_name']); ?></p>
                     <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
-                    <p>Rating: <span class="stars"><?php echo displayStars($restaurant['average_rating']); ?></span></p>
+                    <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating']); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
                 </a>
             <?php endforeach; ?>
         </div>
