@@ -81,15 +81,18 @@ function displayStars($rating) {
     <main>
         <h2>Top Rated Restaurants</h2>
         <form method="get" class="filter-form">
-            <label for="cuisines">Filter by Cuisine:</label>
-            <select name="cuisines[]" id="cuisines" multiple>
-                <?php foreach ($cuisines as $cuisine): ?>
-                    <option value="<?php echo $cuisine['id']; ?>" <?php echo in_array($cuisine['id'], $_GET['cuisines'] ?? []) ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($cuisine['name']); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <button type="submit">Filter</button>
+            <div class="cuisine-filter">
+                <button type="button" class="filter-toggle">Filter by Cuisine ▼</button>
+                <div class="filter-options">
+                    <?php foreach ($cuisines as $cuisine): ?>
+                        <label>
+                            <input type="checkbox" name="cuisines[]" value="<?php echo $cuisine['id']; ?>" <?php echo in_array($cuisine['id'], $_GET['cuisines'] ?? []) ? 'checked' : ''; ?>>
+                            <?php echo htmlspecialchars($cuisine['name']); ?>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <button type="submit">Apply</button>
         </form>
         <div class="restaurant-grid">
             <?php foreach ($restaurants as $restaurant): ?>
