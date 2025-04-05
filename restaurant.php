@@ -30,9 +30,29 @@ if (!$restaurant) {
     die("Restaurant not found.");
 }
 
-// Fetch dishes
-$stmt = $pdo->prepare("SELECT * FROM dishes WHERE restaurant_id = :id");
-$stmt->execute([':id' => $restaurant_id]);
+// Fetch user preferences
+$stmt = $pdo->prepare("SELECT dietary_restrictions FROM user_preferences WHERE user_id = :user_id");
+$stmt->execute([':user_id' => $_SESSION['user_id']]);
+$prefs = $stmt->fetch(PDO::FETCH_ASSOC);
+$user_dietary = $prefs && $prefs['dietary_restrictions'] ? explode(',', $prefs['dietary_restrictions']) : [];
+
+// Fetch dishes with dynamic filtering
+$show_all = isset($_GET['show_all']) && $_GET['show_all'] == '1';
+$sql = "SELECT * FROM dishes WHERE restaurant_id = :id";
+if (!empty($user_dietary) && !$show_all) {
+    $conditions = array_map(function($pref) {
+        return "FIND_IN_SET(:$pref, dietary_restrictions) > 0";
+    }, array_keys($user_dietary));
+    $sql .= " AND (" . implode(' OR ', $conditions) . " OR dietary_restrictions = '' OR dietary_restrictions IS NULL)";
+}
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':id', $restaurant_id, PDO::PARAM_INT);
+if (!empty($user_dietary) && !$show_all) {
+    foreach ($user_dietary as $key => $pref) {
+        $stmt->bindValue(":$key", $pref);
+    }
+}
+$stmt->execute();
 $dishes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch reviews
@@ -48,6 +68,7 @@ $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Function to display stars
 function displayStars($rating) {
+    $rating = $rating ?: 0;
     $fullStars = floor($rating);
     $halfStar = ($rating - $fullStars) >= 0.5 ? 1 : 0;
     $emptyStars = 5 - $fullStars - $halfStar;
@@ -63,7 +84,6 @@ function displayStars($rating) {
     <link rel="stylesheet" href="restaurant.css">
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="header-left">
             <h1>Foodie</h1>
@@ -75,7 +95,7 @@ function displayStars($rating) {
                 <button class="dropdown-btn">Menu ▼</button>
                 <div class="dropdown-content">
                     <a href="dashboard.php">Home</a>
-                    <a href="#about">About</a>
+                    <a href="preference.php">Preference</a>
                     <a href="#contact">Contact</a>
                     <a href="logout.php">Logout</a>
                 </div>
@@ -83,18 +103,24 @@ function displayStars($rating) {
         </div>
     </header>
 
-    <!-- Main -->
     <main>
         <section class="restaurant-header">
             <img src="<?php echo htmlspecialchars($restaurant['photo']); ?>" alt="<?php echo htmlspecialchars($restaurant['name']); ?>" class="restaurant-photo">
             <h2><?php echo htmlspecialchars($restaurant['name']); ?></h2>
             <p>Cuisine: <?php echo htmlspecialchars($restaurant['cuisine_name']); ?></p>
             <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
-            <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating'] ?: 0); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
+            <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating']); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
         </section>
 
         <section class="menu">
             <h3>Menu</h3>
+            <?php if (!empty($user_dietary)): ?>
+                <p>
+                    <a href="?id=<?php echo $restaurant_id; ?>&show_all=<?php echo $show_all ? '0' : '1'; ?>">
+                        <?php echo $show_all ? 'Filter by My Preferences' : 'Show All Dishes'; ?>
+                    </a>
+                </p>
+            <?php endif; ?>
             <ul>
                 <?php foreach ($dishes as $dish): ?>
                     <li>
@@ -122,10 +148,9 @@ function displayStars($rating) {
         </section>
     </main>
 
-    <!-- Footer -->
     <footer>
         <p>© 2025 Foodie. All rights reserved.</p>
         <p>Follow us: <a href="#">Facebook</a> | <a href="#">Twitter</a> | <a href="#">Instagram</a></p>
     </footer>
 </body>
-</html> 
+</html>
