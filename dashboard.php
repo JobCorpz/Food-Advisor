@@ -70,7 +70,7 @@ function displayStars($rating) {
                 <button class="dropdown-btn">Menu ▼</button>
                 <div class="dropdown-content">
                     <a href="dashboard.php">Home</a>
-                    <a href="preference.php">Prefernce</a>
+                    <a href="preference.php">Preference</a>
                     <a href="logout.php">Logout</a>
                 </div>
             </div>
