@@ -122,7 +122,7 @@ function displayStars($rating) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($restaurant['name']); ?> - Foodie</title>
-    <link rel="stylesheet" href="restaurant.css">
+    <link rel="stylesheet" href="styles/restaurant.css">
 </head>
 <body>
     <!-- Header -->
