@@ -13,12 +13,12 @@
         <img src="logo/foodie-logo-black.png" alt="logo" style="min-height: 150px;">
         <h2>Your personalized online Food Advisor</h2>
     </div>
-    <div class = "Auth ">
+    <div class = "Auth">
         <h1>Start your Journey</h1>
         <form action= "create_account.php" method="get">
             <button type= "submit">Create account</button>
         </form>
-        <h6>Already have an account?</h6>
+        <p>Already have an account?</p>
         <form action="login.php" method="get">
             <button type= "submit">Sign in </button>
         </form>
