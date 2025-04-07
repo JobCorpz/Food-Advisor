@@ -39,6 +39,15 @@ $stmt = $pdo->prepare($top_sql);
 $stmt->execute($params);
 $top_restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// photo paths for top restaurants
+foreach ($top_restaurants as &$restaurant) {
+    if (!empty($restaurant['photo'])) {
+        $restaurant['photo'] = 'photos/' . $restaurant['photo'];
+    }
+}
+unset($restaurant);
+
+
 $all_sql = "
     SELECT r.*, c.name AS cuisine_name, AVG(re.rating) AS avg_rating, COUNT(re.id) AS review_count
     FROM restaurants r
@@ -53,6 +62,14 @@ $all_sql .= " GROUP BY r.id, r.name, r.location, r.cuisine_id, r.photo
 $stmt = $pdo->prepare($all_sql);
 $stmt->execute($params);
 $all_restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// photo paths for all restaurants
+foreach ($all_restaurants as &$restaurant) {
+    if (!empty($restaurant['photo'])) {
+        $restaurant['photo'] = 'photos/' . $restaurant['photo'];
+    }
+}
+unset($restaurant);
 
 function displayStars($rating) {
     $rating = $rating ?: 0;

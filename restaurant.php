@@ -28,6 +28,11 @@ $stmt = $pdo->prepare("
 $stmt->execute([':id' => $restaurant_id]);
 $restaurant = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Fix photo path
+if ($restaurant && !empty($restaurant['photo'])) {
+    $restaurant['photo'] = 'photos/' . $restaurant['photo'];
+}
+
 if (!$restaurant) {
     die("Restaurant not found.");
 }
