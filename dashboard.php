@@ -89,7 +89,7 @@ function displayStars($rating) {
     <link rel="stylesheet" href="styles/dashboard.css">
 </head>
 <body>
-    
+
     <header>
         <div class="header-left">
             <h1>Foodie</h1>
@@ -113,7 +113,7 @@ function displayStars($rating) {
             <h2>Top Rated Restaurants</h2>
             <form method="get" class="filter-form">
                 <div class="cuisine-filter">
-                    <button type="button" class="filter-toggle">Filter by Cuisine &nbsp; ▼</button>
+                    <button type="button" class="filter-toggle">Filter by Cuisine&nbsp; ▼</button>
                     <div class="filter-options">
                         <?php foreach ($cuisines as $cuisine): ?>
                             <label>

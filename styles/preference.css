@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Fugaz+One&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -5,7 +7,7 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Rubik", sans-serif;
     background-color: #f5f5f5;
     min-height: 100vh;
     display: flex;
