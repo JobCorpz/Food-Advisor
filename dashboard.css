@@ -104,7 +104,7 @@ header {
 main {
     flex: 1;
     max-width: 1200px;
-    /* margin: 20px auto; i cant center it so im commenting this for now*/ 
+    /* margin: 20px auto; i cant center it so im commenting this for*/ 
     padding: 20px;
     display: flex;
     flex-direction: column; /* Ensure vertical stacking */

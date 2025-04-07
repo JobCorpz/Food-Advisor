@@ -5,6 +5,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+$message = ''; // Initialize the message variable
+
 try {
     $pdo = new PDO("mysql:host=localhost;dbname=foodie_db", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -80,6 +82,26 @@ $stmt->execute([':id' => $restaurant_id]);
 $total_reviews = $stmt->fetchColumn();
 $total_pages = ceil($total_reviews / $per_page);
 
+// Handle review submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $rating = isset($_POST['rating']) ? (int)$_POST['rating'] : 0;
+    $comment = trim($_POST['comment'] ?? '');
+
+    if ($rating >= 1 && $rating <= 5 && !empty($comment)) {
+        $stmt = $pdo->prepare("
+            INSERT INTO reviews (user_id, restaurant_id, rating, comment, created_at)
+            VALUES (?, ?, ?, ?, NOW())
+        ");
+        $stmt->execute([$_SESSION['user_id'], $restaurant_id, $rating, $comment]);
+        $message = "Review submitted successfully!";
+        header("Location: restaurant.php?id=$restaurant_id"); // Refresh to show new review
+        exit();
+    } else {
+        $message = "Please provide a rating (1-5) and a comment.";
+    }
+}
+
+
 // Function to display stars
 function displayStars($rating) {
     $rating = $rating ?: 0;
@@ -145,6 +167,29 @@ function displayStars($rating) {
                 <?php endforeach; ?>
             </ul>
         </section>
+
+
+        <!-- Review Form -->
+        <h3>Write a Review</h3>
+        <?php if ($message): ?>
+            <p class="message"><?php echo htmlspecialchars($message); ?></p>
+        <?php endif; ?>
+        <form method="post" class="review-form">
+            <label for="rating">Rating (1-5):</label>
+            <select id="rating" name="rating" required>
+                <option value="">Select a rating</option>
+                <option value="1">1 ★</option>
+                <option value="2">2 ★★</option>
+                <option value="3">3 ★★★</option>
+                <option value="4">4 ★★★★</option>
+                <option value="5">5 ★★★★★</option>
+            </select>
+
+            <label for="comment">Comment:</label>
+            <textarea id="comment" name="comment" rows="4" required placeholder="Write your review here..."></textarea>
+
+            <button type="submit">Submit Review</button>
+        </form>
 
         <section class="reviews">
             <h3>Reviews</h3>

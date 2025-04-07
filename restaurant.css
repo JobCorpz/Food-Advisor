@@ -168,6 +168,64 @@ main {
     font-style: italic;
 }
 
+
+/* Review Form */
+.review-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.review-form label {
+    display: block;
+    margin: 10px 0 5px;
+    color: #666;
+    font-weight: bold;
+}
+
+.review-form select,
+.review-form textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    border: 2px solid #e74c3c;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.review-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.review-form button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.review-form button:hover {
+    background-color: #c0392b;
+}
+
+.message {
+    color: #f1c40f;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #fff3cd;
+    border-radius: 5px;
+}
+
+
 .reviews .review {
     background-color: #fff;
     padding: 15px;
