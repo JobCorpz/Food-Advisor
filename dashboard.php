@@ -75,7 +75,7 @@ function displayStars($rating) {
     <header>
         <div class="header-left">
             <h1>Foodie</h1>
-            <a href="dashboard.php"><img src="<?php echo BASE_URL; ?>istockphoto-1295311342-612x612.jpg" alt="Foodie Logo" class="logo" onerror="this.src='https://via.placeholder.com/40';"></a>
+            <a href="dashboard.php"><img src="<?php echo BASE_URL; ?>logo/foodie-logo-white.png" alt="Foodie Logo" class="logo" onerror="this.src='https://via.placeholder.com/40';"></a>
         </div>
         <div class="header-right">
             <a href="preference.php"><img src="<?php echo BASE_URL; ?>user-member-avatar-face-profile-icon-vector-22965342.jpg" alt="Profile" class="profile-icon" onerror="this.src='https://via.placeholder.com/35';"></a>

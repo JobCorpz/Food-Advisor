@@ -10,7 +10,7 @@
     <div class = "parent">
     <div class = "Logo">
         <h1>Foodie</h1>
-        <img src="istockphoto-1295311342-612x612.jpg" alt="">
+        <img src="logo/foodie-logo-black.png" alt="logo" style="min-height: 150px;">
         <h2>Your personalized online Food Advisor</h2>
     </div>
     <div class = "Auth ">
