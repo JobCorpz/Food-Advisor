@@ -89,6 +89,7 @@ function displayStars($rating) {
     <link rel="stylesheet" href="styles/dashboard.css">
 </head>
 <body>
+    
     <header>
         <div class="header-left">
             <h1>Foodie</h1>
@@ -107,55 +108,57 @@ function displayStars($rating) {
         </div>
     </header>
 
-    <main>
-        <h2>Top Rated Restaurants</h2>
-        <form method="get" class="filter-form">
-            <div class="cuisine-filter">
-                <button type="button" class="filter-toggle">Filter by Cuisine ▼</button>
-                <div class="filter-options">
-                    <?php foreach ($cuisines as $cuisine): ?>
-                        <label>
-                            <input type="checkbox" name="cuisines[]" value="<?php echo $cuisine['id']; ?>" <?php echo in_array($cuisine['id'], $_GET['cuisines'] ?? []) ? 'checked' : ''; ?>>
-                            <?php echo htmlspecialchars($cuisine['name']); ?>
-                        </label>
-                    <?php endforeach; ?>
+    <div id="centre">
+        <main>
+            <h2>Top Rated Restaurants</h2>
+            <form method="get" class="filter-form">
+                <div class="cuisine-filter">
+                    <button type="button" class="filter-toggle">Filter by Cuisine &nbsp; ▼</button>
+                    <div class="filter-options">
+                        <?php foreach ($cuisines as $cuisine): ?>
+                            <label>
+                                <input type="checkbox" name="cuisines[]" value="<?php echo $cuisine['id']; ?>" <?php echo in_array($cuisine['id'], $_GET['cuisines'] ?? []) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($cuisine['name']); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
+                <button type="submit">Apply</button>
+            </form>
+            <div class="restaurant-grid">
+                <?php foreach ($top_restaurants as $restaurant): ?>
+                    <a href="restaurant.php?id=<?php echo $restaurant['id']; ?>" class="restaurant-card">
+                        <img src="<?php echo BASE_URL . htmlspecialchars($restaurant['photo']); ?>" 
+                            alt="<?php echo htmlspecialchars($restaurant['name']); ?>" 
+                            class="restaurant-photo" 
+                            onerror="this.src='https://via.placeholder.com/200';">
+                        <h3><?php echo htmlspecialchars($restaurant['name']); ?></h3>
+                        <p>Cuisine: <?php echo htmlspecialchars($restaurant['cuisine_name']); ?></p>
+                        <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
+                        <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating']); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
+                        <p>Reviews: <?php echo $restaurant['review_count']; ?></p>
+                    </a>
+                <?php endforeach; ?>
             </div>
-            <button type="submit">Apply</button>
-        </form>
-        <div class="restaurant-grid">
-            <?php foreach ($top_restaurants as $restaurant): ?>
-                <a href="restaurant.php?id=<?php echo $restaurant['id']; ?>" class="restaurant-card">
-                    <img src="<?php echo BASE_URL . htmlspecialchars($restaurant['photo']); ?>" 
-                         alt="<?php echo htmlspecialchars($restaurant['name']); ?>" 
-                         class="restaurant-photo" 
-                         onerror="this.src='https://via.placeholder.com/200';">
-                    <h3><?php echo htmlspecialchars($restaurant['name']); ?></h3>
-                    <p>Cuisine: <?php echo htmlspecialchars($restaurant['cuisine_name']); ?></p>
-                    <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
-                    <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating']); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
-                    <p>Reviews: <?php echo $restaurant['review_count']; ?></p>
-                </a>
-            <?php endforeach; ?>
-        </div>
 
-        <h2>All Restaurants</h2>
-        <div class="restaurant-grid">
-            <?php foreach ($all_restaurants as $restaurant): ?>
-                <a href="restaurant.php?id=<?php echo $restaurant['id']; ?>" class="restaurant-card">
-                    <img src="<?php echo BASE_URL . htmlspecialchars($restaurant['photo']); ?>" 
-                         alt="<?php echo htmlspecialchars($restaurant['name']); ?>" 
-                         class="restaurant-photo" 
-                         onerror="this.src='https://via.placeholder.com/200';">
-                    <h3><?php echo htmlspecialchars($restaurant['name']); ?></h3>
-                    <p>Cuisine: <?php echo htmlspecialchars($restaurant['cuisine_name']); ?></p>
-                    <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
-                    <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating']); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
-                    <p>Reviews: <?php echo $restaurant['review_count']; ?></p>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </main>
+            <h2>All Restaurants</h2>
+            <div class="restaurant-grid">
+                <?php foreach ($all_restaurants as $restaurant): ?>
+                    <a href="restaurant.php?id=<?php echo $restaurant['id']; ?>" class="restaurant-card">
+                        <img src="<?php echo BASE_URL . htmlspecialchars($restaurant['photo']); ?>" 
+                            alt="<?php echo htmlspecialchars($restaurant['name']); ?>" 
+                            class="restaurant-photo" 
+                            onerror="this.src='https://via.placeholder.com/200';">
+                        <h3><?php echo htmlspecialchars($restaurant['name']); ?></h3>
+                        <p>Cuisine: <?php echo htmlspecialchars($restaurant['cuisine_name']); ?></p>
+                        <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
+                        <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating']); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
+                        <p>Reviews: <?php echo $restaurant['review_count']; ?></p>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </main>
+    </div>
 
     <footer>
         <p>© 2025 Foodie. All rights reserved.</p>

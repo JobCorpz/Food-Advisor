@@ -101,6 +101,13 @@ header {
 }
 
 /* Main */
+
+#centre {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 main {
     flex: 1;
     max-width: 1200px;
@@ -114,6 +121,7 @@ main {
 main h2 {
     color: #e74c3c;
     font-size: 1.8em;
+    margin-top: 20px;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -132,13 +140,11 @@ main h2 {
 }
 
 .filter-toggle {
-    background-color: #e74c3c;
-    color: white;
+    font-weight: bold;
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-weight: bold;
     transition: background-color 0.2s;
 }
 
@@ -170,8 +176,6 @@ main h2 {
 }
 
 .filter-form button[type="submit"] {
-    background-color: #e74c3c;
-    color: white;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
@@ -181,6 +185,12 @@ main h2 {
 
 .filter-form button[type="submit"]:hover {
     background-color: #c0392b;
+}
+
+.filter-form button[type="submit"], .filter-toggle {
+    background-color: #e74c3c;
+    font-size: 14px;
+    color: white;
 }
 
 /* Restaurant Grid */
