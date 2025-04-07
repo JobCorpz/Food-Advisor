@@ -52,25 +52,30 @@ if (isset($_POST['submit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foodie - Create Account</title>
-    <link rel="stylesheet" href="create_account.css">
+    <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <form method="post">
-        <?php if ($error): ?>
-            <p class="error"><?php echo $error; ?></p>
-        <?php endif; ?>
-        <?php if ($success): ?>
-            <p class="success"><?php echo $success; ?></p>
-        <?php endif; ?>
-        <input type="text" name="name" placeholder="Full Name" required>
-        <br>
-        <input type="email" name="email" placeholder="Email" required>
-        <br>
-        <input type="password" name="password" placeholder="Password" required>
-        <br>
-        <input type="password" name="re_password" placeholder="Re-enter Password" required>
-        <br>
-        <button type="submit" name="submit">Create Account</button>
-    </form>
+    <div class="container">
+        <div class="form-container">
+            <h2>Create Account</h2>
+
+            <?php if ($error): ?>
+                <p class="error"><?php echo $error; ?></p>
+            <?php endif; ?>
+            <?php if ($success): ?>
+                <p class="success"><?php echo $success; ?></p>
+            <?php endif; ?>
+
+            <form method="post">
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="password" name="re_password" placeholder="Re-enter Password" required>
+                <button type="submit" name="submit">Create Account</button>
+                <p class="toggle-text">Already have an account? <a href="login.php">Sign in</a></p>
+            </form>
+        </div>
+    </div>
 </body>
+
 </html>
