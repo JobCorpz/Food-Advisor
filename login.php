@@ -9,9 +9,12 @@ try {
     die("Connection failed: " . $e->getMessage());
 }
 
-$error = '';
+$login_error = '';
+$register_error = '';
+$register_success = '';
 
-if (isset($_POST['submit'])) {
+// Handle login
+if (isset($_POST['login_submit'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
@@ -24,31 +27,93 @@ if (isset($_POST['submit'])) {
         // Successful login
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
-        header("Location: preference.php"); // Redirect to a dashboard or home page
+        header("Location: preference.php");
         exit();
     } else {
-        $error = "Invalid email or password.";
+        $login_error = "Invalid email or password.";
+    }
+}
+
+// Handle registration
+if (isset($_POST['register_submit'])) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    // Validation
+    if (empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
+        $register_error = "All fields are required.";
+    } elseif ($password !== $confirm_password) {
+        $register_error = "Passwords do not match.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $register_error = "Invalid email format.";
+    } else {
+        // Check if email already exists
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = :email");
+        $stmt->execute([':email' => $email]);
+        if ($stmt->fetchColumn() > 0) {
+            $register_error = "Email already registered.";
+        } else {
+            // Register new user
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
+            $stmt->execute([':name' => $name, ':email' => $email, ':password' => $hashed_password]);
+            $register_success = "Account created successfully! Please sign in.";
+        }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foodie - Login</title>
+    <title>Foodie - Login / Register</title>
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <form method="post">
-        <?php if ($error): ?>
-            <p class="error"><?php echo $error; ?></p>
-        <?php endif; ?>
-        <input type="email" name="email" placeholder="Email" required>
-        <br>
-        <input type="password" name="password" placeholder="Password" required>
-        <br>
-        <button type="submit" name="submit">Sign In</button>
-    </form>
+    <div class="container">
+        <!-- Login Form -->
+        <div class="form-container" id="login-form">
+            <h2>Sign In</h2>
+            <?php if ($login_error): ?>
+                <p class="error"><?php echo $login_error; ?></p>
+            <?php endif; ?>
+            <?php if ($register_success): ?>
+                <p class="success"><?php echo $register_success; ?></p>
+            <?php endif; ?>
+            <form method="post">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" name="login_submit">Sign In</button>
+                <p class="toggle-text">Don't have an account? <a href="#" onclick="toggleForm('register')">Create one</a></p>
+            </form>
+        </div>
+
+        <!-- Registration Form -->
+        <div class="form-container" id="register-form" style="display: none;">
+            <h2>Create Account</h2>
+            <?php if ($register_error): ?>
+                <p class="error"><?php echo $register_error; ?></p>
+            <?php endif; ?>
+            <form method="post">
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                <button type="submit" name="register_submit">Register</button>
+                <p class="toggle-text">Already have an account? <a href="#" onclick="toggleForm('login')">Sign in</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm(form) {
+            document.getElementById('login-form').style.display = form === 'login' ? 'block' : 'none';
+            document.getElementById('register-form').style.display = form === 'register' ? 'block' : 'none';
+        }
+    </script>
 </body>
 </html>
