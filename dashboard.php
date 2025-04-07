@@ -12,60 +12,57 @@ try {
     die("Connection failed: " . $e->getMessage());
 }
 
-// Fetch cuisines for filter
-$cuisines = $pdo->query("SELECT * FROM cuisines")->fetchAll(PDO::FETCH_ASSOC);
+define('BASE_URL', 'http://localhost/Food-Advisor/');
 
-// Handle review submission
-if (isset($_POST['submit_review'])) {
-    $restaurant_id = $_POST['restaurant_id'];
-    $rating = $_POST['rating'];
-    $comment = $_POST['comment'];
+$cuisines = $pdo->query("SELECT * FROM cuisines ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmt = $pdo->prepare("INSERT INTO reviews (user_id, restaurant_id, rating, comment) VALUES (:user_id, :restaurant_id, :rating, :comment)");
-    $stmt->execute([
-        ':user_id' => $_SESSION['user_id'],
-        ':restaurant_id' => $restaurant_id,
-        ':rating' => $rating,
-        ':comment' => $comment
-    ]);
-
-    // Update average rating
-    $stmt = $pdo->prepare("UPDATE restaurants SET average_rating = (SELECT AVG(rating) FROM reviews WHERE restaurant_id = :restaurant_id) WHERE id = :restaurant_id");
-    $stmt->execute([':restaurant_id' => $restaurant_id]);
-}
-
-// Handle filters
 $where = [];
 $params = [];
-if (!empty($_GET['cuisine'])) {
-    $where[] = "cuisine_id = :cuisine";
-    $params[':cuisine'] = $_GET['cuisine'];
-}
-if (!empty($_GET['location'])) {
-    $where[] = "location LIKE :location";
-    $params[':location'] = '%' . $_GET['location'] . '%';
+if (!empty($_GET['cuisines'])) {
+    $where[] = "r.cuisine_id IN (" . implode(',', array_fill(0, count($_GET['cuisines']), '?')) . ")";
+    $params = array_merge($params, $_GET['cuisines']);
 }
 
-$sql = "SELECT r.*, c.name AS cuisine_name FROM restaurants r JOIN cuisines c ON r.cuisine_id = c.id";
+$top_sql = "
+    SELECT r.*, c.name AS cuisine_name, AVG(re.rating) AS avg_rating, COUNT(re.id) AS review_count
+    FROM restaurants r
+    JOIN cuisines c ON r.cuisine_id = c.id
+    LEFT JOIN reviews re ON r.id = re.restaurant_id
+";
 if ($where) {
-    $sql .= " WHERE " . implode(" AND ", $where);
+    $top_sql .= " WHERE " . implode(" AND ", $where);
 }
-$stmt = $pdo->prepare($sql);
+$top_sql .= " GROUP BY r.id, r.name, r.location, r.cuisine_id, r.photo
+              ORDER BY avg_rating DESC
+              LIMIT 5";
+$stmt = $pdo->prepare($top_sql);
 $stmt->execute($params);
-$restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$top_restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Function to display stars based on rating
+$all_sql = "
+    SELECT r.*, c.name AS cuisine_name, AVG(re.rating) AS avg_rating, COUNT(re.id) AS review_count
+    FROM restaurants r
+    JOIN cuisines c ON r.cuisine_id = c.id
+    LEFT JOIN reviews re ON r.id = re.restaurant_id
+";
+if ($where) {
+    $all_sql .= " WHERE " . implode(" AND ", $where);
+}
+$all_sql .= " GROUP BY r.id, r.name, r.location, r.cuisine_id, r.photo
+              ORDER BY r.name";
+$stmt = $pdo->prepare($all_sql);
+$stmt->execute($params);
+$all_restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 function displayStars($rating) {
-    $fullStars = floor($rating); // Number of full stars
-    $halfStar = ($rating - $fullStars) >= 0.5 ? 1 : 0; // Half star if >= 0.5
-    $emptyStars = 5 - $fullStars - $halfStar; // Remaining empty stars
-
-    $stars = str_repeat('★', $fullStars); // Full stars
-    $stars .= $halfStar ? '½' : ''; // Half star (using text for simplicity)
-    $stars .= str_repeat('☆', $emptyStars); // Empty stars
-    return $stars . " (" . number_format($rating, 2) . ")";
+    $rating = $rating ?: 0;
+    $fullStars = floor($rating);
+    $halfStar = ($rating - $fullStars) >= 0.5 ? 1 : 0;
+    $emptyStars = 5 - $fullStars - $halfStar;
+    return str_repeat('★', $fullStars) . ($halfStar ? '½' : '') . str_repeat('☆', $emptyStars);
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,78 +70,83 @@ function displayStars($rating) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foodie - Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
-    <style>
-        .stars {
-        display: inline-block;
-        position: relative;
-        font-size: 1.2em;
-    }
-        .stars::before {
-        content: "☆☆☆☆☆";
-        color: #ddd;
-    }
-    .stars::after {
-        content: "★★★★★";
-        color: #f1c40f;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: calc(20% * <?php echo $restaurant['average_rating']; ?>);
-        overflow: hidden;
-    }
-    </style>
 </head>
 <body>
-    <div class="dashboard">
-        <h1>Welcome, <?php echo htmlspecialchars($_SESSION['user_name']); ?>!</h1>
-        <a href="preference.php">Set Preferences</a> | <a href="logout.php">Logout</a>
-
-        <!-- Filter Form -->
-        <form method="get" class="filter-form">
-            <select name="cuisine">
-                <option value="">All Cuisines</option>
-                <?php foreach ($cuisines as $cuisine): ?>
-                    <option value="<?php echo $cuisine['id']; ?>" <?php echo isset($_GET['cuisine']) && $_GET['cuisine'] == $cuisine['id'] ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($cuisine['name']); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <input type="text" name="location" placeholder="Enter location" value="<?php echo isset($_GET['location']) ? htmlspecialchars($_GET['location']) : ''; ?>">
-            <button type="submit">Filter</button>
-        </form>
-
-        <!-- Restaurants List -->
-        <h2>Explore Restaurants</h2>
-        <?php foreach ($restaurants as $restaurant): ?>
-            <div class="restaurant">
-                <h3><?php echo htmlspecialchars($restaurant['name']); ?> (<?php echo htmlspecialchars($restaurant['cuisine_name']); ?>)</h3>
-                <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
-                <p>Average Rating: <span class="stars"><?php echo displayStars($restaurant['average_rating']); ?></span></p>
-
-                <!-- Dishes -->
-                <?php
-                $dishes = $pdo->prepare("SELECT * FROM dishes WHERE restaurant_id = :restaurant_id");
-                $dishes->execute([':restaurant_id' => $restaurant['id']]);
-                $dish_list = $dishes->fetchAll(PDO::FETCH_ASSOC);
-                ?>
-                <h4>Dishes</h4>
-                <ul>
-                    <?php foreach ($dish_list as $dish): ?>
-                        <li><?php echo htmlspecialchars($dish['name']); ?> - $<?php echo number_format($dish['price'], 2); ?><br><?php echo htmlspecialchars($dish['description']); ?></li>
-                    <?php endforeach; ?>
-                </ul>
-
-                <!-- Review Form -->
-                <form method="post" class="review-form">
-                    <input type="hidden" name="restaurant_id" value="<?php echo $restaurant['id']; ?>">
-                    <label>Rating (1-5): 
-                        <input type="number" name="rating" min="1" max="5" step="0.5" required>
-                    </label>
-                    <textarea name="comment" placeholder="Your review" required></textarea>
-                    <button type="submit" name="submit_review">Submit Review</button>
-                </form>
+    <header>
+        <div class="header-left">
+            <h1>Foodie</h1>
+            <a href="dashboard.php"><img src="<?php echo BASE_URL; ?>istockphoto-1295311342-612x612.jpg" alt="Foodie Logo" class="logo" onerror="this.src='https://via.placeholder.com/40';"></a>
+        </div>
+        <div class="header-right">
+            <a href="preference.php"><img src="<?php echo BASE_URL; ?>user-member-avatar-face-profile-icon-vector-22965342.jpg" alt="Profile" class="profile-icon" onerror="this.src='https://via.placeholder.com/35';"></a>
+            <div class="dropdown">
+                <button class="dropdown-btn">Menu ▼</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.php">Home</a>
+                    <a href="preference.php">Preference</a>
+                    <a href="logout.php">Logout</a>
+                </div>
             </div>
-        <?php endforeach; ?>
-    </div>
+        </div>
+    </header>
+
+    <main>
+        <h2>Top Rated Restaurants</h2>
+        <form method="get" class="filter-form">
+            <div class="cuisine-filter">
+                <button type="button" class="filter-toggle">Filter by Cuisine ▼</button>
+                <div class="filter-options">
+                    <?php foreach ($cuisines as $cuisine): ?>
+                        <label>
+                            <input type="checkbox" name="cuisines[]" value="<?php echo $cuisine['id']; ?>" <?php echo in_array($cuisine['id'], $_GET['cuisines'] ?? []) ? 'checked' : ''; ?>>
+                            <?php echo htmlspecialchars($cuisine['name']); ?>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <button type="submit">Apply</button>
+        </form>
+        <div class="restaurant-grid">
+            <?php foreach ($top_restaurants as $restaurant): ?>
+                <a href="restaurant.php?id=<?php echo $restaurant['id']; ?>" class="restaurant-card">
+                    <img src="<?php echo BASE_URL . htmlspecialchars($restaurant['photo']); ?>" 
+                         alt="<?php echo htmlspecialchars($restaurant['name']); ?>" 
+                         class="restaurant-photo" 
+                         onerror="this.src='https://via.placeholder.com/200';">
+                    <h3><?php echo htmlspecialchars($restaurant['name']); ?></h3>
+                    <p>Cuisine: <?php echo htmlspecialchars($restaurant['cuisine_name']); ?></p>
+                    <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
+                    <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating']); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
+                    <p>Reviews: <?php echo $restaurant['review_count']; ?></p>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <h2>All Restaurants</h2>
+        <div class="restaurant-grid">
+            <?php foreach ($all_restaurants as $restaurant): ?>
+                <a href="restaurant.php?id=<?php echo $restaurant['id']; ?>" class="restaurant-card">
+                    <img src="<?php echo BASE_URL . htmlspecialchars($restaurant['photo']); ?>" 
+                         alt="<?php echo htmlspecialchars($restaurant['name']); ?>" 
+                         class="restaurant-photo" 
+                         onerror="this.src='https://via.placeholder.com/200';">
+                    <h3><?php echo htmlspecialchars($restaurant['name']); ?></h3>
+                    <p>Cuisine: <?php echo htmlspecialchars($restaurant['cuisine_name']); ?></p>
+                    <p>Location: <?php echo htmlspecialchars($restaurant['location']); ?></p>
+                    <p>Rating: <span class="stars"><?php echo displayStars($restaurant['avg_rating']); ?></span> (<?php echo number_format($restaurant['avg_rating'] ?: 0, 2); ?>/5)</p>
+                    <p>Reviews: <?php echo $restaurant['review_count']; ?></p>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 Foodie. All rights reserved.</p>
+        <p>Follow us: 
+            <a href="#">Facebook</a> | 
+            <a href="#">Twitter</a> | 
+            <a href="#">Instagram</a>
+        </p>
+    </footer>
 </body>
 </html>

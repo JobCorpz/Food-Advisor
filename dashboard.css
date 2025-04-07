@@ -8,135 +8,252 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
     min-height: 100vh;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
-.dashboard {
-    max-width: 1200px;
-    margin: 0 auto;
+/* Header */
+header {
+    background-color: #e74c3c;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-h1 {
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left h1 {
+    font-size: 1.8em;
+    margin-right: 15px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.profile-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-btn {
+    background-color: white;
     color: #e74c3c;
-    font-size: 2.5em;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.dropdown-btn:hover {
+    background-color: #ddd;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    min-width: 120px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: #e74c3c;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    transition: background-color 0.2s;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Main */
+main {
+    flex: 1;
+    max-width: 1200px;
+    /* margin: 20px auto; i cant center it so im commenting this for*/ 
+    padding: 20px;
+    display: flex;
+    flex-direction: column; /* Ensure vertical stacking */
+    gap: 40px; /* Space between sections */
+}
+
+main h2 {
+    color: #e74c3c;
+    font-size: 1.8em;
+    margin-bottom: 20px;
     text-align: center;
+}
+
+/* Filter Form */
+.filter-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
     margin-bottom: 20px;
 }
 
-a {
-    color: #e74c3c;
-    text-decoration: none;
-    font-weight: bold;
-    margin-right: 10px;
+.cuisine-filter {
+    position: relative;
 }
 
-a:hover {
+.filter-toggle {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.filter-toggle:hover {
+    background-color: #c0392b;
+}
+
+.filter-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 10;
+    min-width: 150px;
+}
+
+.cuisine-filter:hover .filter-options {
+    display: block;
+}
+
+.filter-options label {
+    display: block;
+    margin: 5px 0;
+    color: #666;
+}
+
+.filter-form button[type="submit"] {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.filter-form button[type="submit"]:hover {
+    background-color: #c0392b;
+}
+
+/* Restaurant Grid */
+.restaurant-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Restaurant Card */
+.restaurant-card {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.restaurant-card:hover {
+    transform: scale(1.05);
+}
+
+.restaurant-photo {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 5px 5px 0 0;
+}
+
+.restaurant-card h3 {
+    color: #e74c3c;
+    font-size: 1.2em;
+    margin: 10px;
+}
+
+.restaurant-card p {
+    color: #666;
+    font-size: 0.9em;
+    margin: 5px 10px;
+}
+
+.stars {
+    color: #f1c40f; /* Gold stars */
+}
+
+/* Footer */
+footer {
+    background-color: #e74c3c;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    margin-top: auto;
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+footer a:hover {
     text-decoration: underline;
 }
 
-.filter-form {
-    margin: 20px 0;
-    text-align: center;
+/* Responsive Design */
+@media (max-width: 768px) {
+    .restaurant-grid {
+        grid-template-columns: 1fr;
+    }
 }
-
-.filter-form select,
-.filter-form input[type="text"] {
-    padding: 10px;
-    margin: 0 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
-}
-
-.filter-form button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.filter-form button:hover {
-    transform: scale(1.05);
-}
-
-h2 {
-    color: #666;
-    font-size: 1.8em;
-    margin: 20px 0;
-}
-
-.restaurant {
-    background-color: #fff;
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.restaurant h3 {
-    color: #e74c3c;
-    font-size: 1.5em;
-}
-
-.restaurant p {
-    color: #333;
-    margin: 5px 0;
-}
-
-.restaurant .stars {
-    color: #f1c40f; /* Gold color for stars */
-    font-size: 1.2em;
-}
-
-.restaurant h4 {
-    color: #666;
-    margin: 10px 0;
-}
-
-.restaurant ul {
-    list-style: none;
-    margin-left: 20px;
-}
-
-.restaurant li {
-    margin: 10px 0;
-    color: #333;
-}
-
-.review-form {
-    margin-top: 20px;
-}
-
-.review-form label {
-    display: block;
-    margin: 10px 0;
-    color: #666;
-}
-
-.review-form input[type="number"],
-.review-form textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
-}
-
-.review-form button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.review-form button:hover {
-    transform: scale(1.05);
-}
-
